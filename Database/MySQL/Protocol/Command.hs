@@ -29,6 +29,8 @@ import           Database.MySQL.Protocol.Packet
 --------------------------------------------------------------------------------
 --  Commands
 
+instance MonadFail PutM where
+
 type StmtID = Word32
 
 -- | All support MySQL commands.
