@@ -53,8 +53,8 @@ escapeText (T.Text arr off len)
         in T.Text arr' 0 len'
   where
     escape c marr ix = do
-        TA.unsafeWrite marr ix 92
-        TA.unsafeWrite marr (ix+1) c
+        TA.unsafeWrite marr ix 92     -- write \
+        TA.unsafeWrite marr (ix+1) c  -- write c
 
     loop oarr oend marr !ix !ix'
         | ix == oend = return (marr, ix')
@@ -75,7 +75,9 @@ escapeText (T.Text arr off len)
                 | c == 9       -> escape 116 marr ix' >> go2 -- \t
                 | c == 26      -> escape 90  marr ix' >> go2 -- \Z
                 | c == 92      -> escape 92  marr ix' >> go2 -- \\
-
+                -- Need to escape % and _ for the LIKE operator
+                | c == 37      -> escape 37  marr ix' >> go2 -- \%
+                | c == 95      -> escape 95  marr ix' >> go2 -- \_
                 | otherwise    -> TA.unsafeWrite marr ix' c >> go1
 
 escapeBytes :: ByteString -> ByteString
