@@ -41,6 +41,7 @@ import           Data.Binary.Parser
 import           Data.Binary.IEEE754
 import           Data.Bits
 import           Data.ByteString                    (ByteString)
+import qualified Data.ByteString.Char8 as Char8
 import qualified Data.ByteString                    as B
 import qualified Data.ByteString.Builder            as BB
 import           Data.ByteString.Builder.Scientific (FPFormat (..),
@@ -53,7 +54,7 @@ import qualified Data.ByteString.Unsafe             as B
 import           Data.Fixed                         (Pico)
 import           Data.Int
 import           Data.Scientific                    (Scientific)
-import           Data.Text                          (Text)
+import           Data.Text                          (Text, unpack)
 import qualified Data.Text.Encoding                 as T
 import           Data.Time.Calendar                 (Day, fromGregorian,
                                                      toGregorian)
@@ -185,7 +186,7 @@ getTextField f
         || t == mySQLTypeLongBlob
         || t == mySQLTypeBlob
         || t == mySQLTypeVarString
-        || t == mySQLTypeString     = (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
+        || t == mySQLTypeString     = (if isText then MySQLText . T.decodeLatin1 else MySQLBytes) <$> getLenEncBytes
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
 
@@ -369,7 +370,7 @@ getBinaryField f
         || t == mySQLTypeLongBlob
         || t == mySQLTypeBlob
         || t == mySQLTypeVarString
-        || t == mySQLTypeString       = if isText then MySQLText . T.decodeUtf8 <$> getLenEncBytes
+        || t == mySQLTypeString       = if isText then MySQLText . T.decodeLatin1 <$> getLenEncBytes
                                                   else MySQLBytes <$> getLenEncBytes
     | t == mySQLTypeBit               = MySQLBit <$> (getBits =<< getLenEncInt)
     | otherwise                       = fail $ "Database.MySQL.Protocol.MySQLValue:\
@@ -444,7 +445,7 @@ putBinaryField (MySQLGeometry bs)  = putLenEncBytes bs
 putBinaryField (MySQLBytes  bs)    = putLenEncBytes bs
 putBinaryField (MySQLBit    word)  = do putWord8 8     -- always put full
                                         putWord64be word
-putBinaryField (MySQLText    t)    = putLenEncBytes (T.encodeUtf8 t)
+putBinaryField (MySQLText    t)    = putLenEncBytes (encodeLatin1 t) -- (T.encodeUtf8 t)
 putBinaryField MySQLNull           = return ()
 
 putBinaryDay :: Day -> Put
@@ -565,3 +566,16 @@ makeNullMap values = BitMap . B.pack $ go values 0x00 0
 --------------------------------------------------------------------------------
 -- TODO: add helpers to parse mySQLTypeGEOMETRY
 -- reference: https://github.com/felixge/node-mysql/blob/master/lib/protocol/Parser.js
+
+
+--------------------------------------------------------------------------------
+-- | NOTE: Decode UTF-8 text that was possibly re-encoded as latin1 text.
+--         If it is not re-encoded text, return the original.
+-- decodeReencodedUTF8 :: ByteString -> Text
+-- decodeReencodedUTF8 bytestring =
+--   case T.decodeUtf8' bytestring of
+--     Left _ -> T.decodeLatin1 bytestring
+--     Right text -> text
+
+encodeLatin1 :: Text -> ByteString
+encodeLatin1 = Char8.pack . unpack
