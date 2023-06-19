@@ -89,7 +89,7 @@ newtype FieldType = FieldType Word8 deriving (Show, Eq)
 mySQLTypeDecimal, mySQLTypeTiny, mySQLTypeShort, mySQLTypeLong, mySQLTypeFloat :: FieldType
 mySQLTypeDouble, mySQLTypeNull, mySQLTypeTimestamp, mySQLTypeLongLong, mySQLTypeInt24 :: FieldType
 mySQLTypeDate, mySQLTypeTime, mySQLTypeDateTime, mySQLTypeYear, mySQLTypeNewDate, mySQLTypeVarChar :: FieldType
-mySQLTypeBit, mySQLTypeTimestamp2, mySQLTypeDateTime2, mySQLTypeTime2, mySQLTypeNewDecimal :: FieldType
+mySQLTypeBit, mySQLTypeTimestamp2, mySQLTypeDateTime2, mySQLTypeTime2, mySQLTypeJSON, mySQLTypeNewDecimal :: FieldType
 mySQLTypeEnum, mySQLTypeSet, mySQLTypeTinyBlob, mySQLTypeMediumBlob, mySQLTypeLongBlob :: FieldType
 mySQLTypeBlob, mySQLTypeVarString, mySQLTypeString, mySQLTypeGeometry :: FieldType
 
@@ -113,6 +113,7 @@ mySQLTypeBit            = FieldType 0x10
 mySQLTypeTimestamp2     = FieldType 0x11
 mySQLTypeDateTime2      = FieldType 0x12
 mySQLTypeTime2          = FieldType 0x13
+mySQLTypeJSON           = FieldType 0xf5
 mySQLTypeNewDecimal     = FieldType 0xf6
 mySQLTypeEnum           = FieldType 0xf7
 mySQLTypeSet            = FieldType 0xf8

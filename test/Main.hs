@@ -67,6 +67,7 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
                 \__text         TEXT(1000000),\
                 \__enum         ENUM('foo', 'bar', 'qux'),\
                 \__set          SET('foo', 'bar', 'qux')\
+                \__value        JSON\
                 \) CHARACTER SET utf8"
 
     resetTestTable c
@@ -142,6 +143,7 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
             execute_ c  "DELETE FROM test WHERE __id=0"
             execute_ c  "INSERT INTO test VALUES(\
                     \0,\
+                    \NULL,\
                     \NULL,\
                     \NULL,\
                     \NULL,\

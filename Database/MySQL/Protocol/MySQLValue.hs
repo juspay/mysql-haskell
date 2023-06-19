@@ -115,6 +115,7 @@ data MySQLValue
     | MySQLBytes         !ByteString
     | MySQLBit           !Word64
     | MySQLText          !Text
+    | MySQLJSON          !ByteString
     | MySQLNull
   deriving (Show, Eq, Generic)
 
@@ -141,6 +142,7 @@ putParamMySQLType (MySQLBytes        _)  = putFieldType mySQLTypeBlob     >> put
 putParamMySQLType (MySQLGeometry     _)  = putFieldType mySQLTypeGeometry >> putWord8 0x00
 putParamMySQLType (MySQLBit          _)  = putFieldType mySQLTypeBit      >> putWord8 0x00
 putParamMySQLType (MySQLText         _)  = putFieldType mySQLTypeString   >> putWord8 0x00
+putParamMySQLType (MySQLJSON         _)  = putFieldType mySQLTypeJSON     >> putWord8 0x00
 putParamMySQLType MySQLNull              = putFieldType mySQLTypeNull     >> putWord8 0x00
 
 --------------------------------------------------------------------------------
@@ -185,9 +187,11 @@ getTextField f
         || t == mySQLTypeLongBlob
         || t == mySQLTypeBlob
         || t == mySQLTypeVarString
+        || t == mySQLTypeJSON
         || t == mySQLTypeString     = (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
+    | t == mySQLTypeJSON            = MySQLJSON <$> getLenEncBytes
 
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
