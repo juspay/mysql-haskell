@@ -46,11 +46,13 @@ tests c = do
         , mySQLTypeBlob
         , mySQLTypeString
         , mySQLTypeString
+        , mySQLTypeJSON
         ]
 
     Just v <- Stream.read is
     assertEqual "decode NULL values" v
         [ MySQLInt32 0
+        , MySQLNull
         , MySQLNull
         , MySQLNull
         , MySQLNull
@@ -115,7 +117,8 @@ tests c = do
                 \__blob       = '12345678'                             ,\
                 \__text       = '韩冬真赞'                             ,\
                 \__enum       = 'foo'                                  ,\
-                \__set        = 'foo,bar' WHERE __id=0"
+                \__set        = 'foo,bar'                              ,\
+                \__value      = '{\"abc\": \"123\"}' WHERE __id=0"
 
     (_, is) <- query_ c "SELECT * FROM test"
     Just v <- Stream.read is
@@ -151,6 +154,7 @@ tests c = do
         , MySQLText "韩冬真赞"
         , MySQLText "foo"
         , MySQLText "foo,bar"
+        , MySQLJSON "{\"abc\": \"123\"}"
         ]
 
     Stream.skipToEof is
@@ -256,6 +260,7 @@ tests c = do
         , MySQLText "韩冬真赞"
         , MySQLText "foo"
         , MySQLText "foo,bar"
+        , MySQLJSON "{\"abc\": \"123\"}"
         ]
 
     Stream.skipToEof is
@@ -300,6 +305,7 @@ tests c = do
         , MySQLNull
         , MySQLText "foo"
         , MySQLText "foo,bar"
+        , MySQLJSON "{\"abc\": \"123\"}"
         ]
 
     Stream.skipToEof is
@@ -344,6 +350,7 @@ tests c = do
         , MySQLNull
         , MySQLText "foo"
         , MySQLText "foo,bar"
+        , MySQLJSON "{\"abc\": \"123\"}"
         ]
 
     Stream.skipToEof is

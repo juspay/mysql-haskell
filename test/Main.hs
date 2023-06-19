@@ -66,10 +66,11 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
                 \__blob         BLOB(1000000),\
                 \__text         TEXT(1000000),\
                 \__enum         ENUM('foo', 'bar', 'qux'),\
-                \__set          SET('foo', 'bar', 'qux')\
+                \__set          SET('foo', 'bar', 'qux'),\
                 \__value        JSON\
                 \) CHARACTER SET utf8"
 
+    step "finished create"
     resetTestTable c
 
     step "testing executeMany"
@@ -85,6 +86,7 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
     step "testing binary protocol"
     BinaryRow.tests c
 
+    step "finished all tests"
     resetTestTable c
 
 

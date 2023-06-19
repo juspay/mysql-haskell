@@ -60,6 +60,7 @@ data BinLogMeta
     | BINLOG_TYPE_STRING      !Word16        -- ^ meta length(if < 256, then length is 8bit,
                                              -- if > 256 then length is 16bit)
     | BINLOG_TYPE_GEOMETRY    !Word8         -- ^ length size
+    | BINLOG_TYPE_JSON        !Word8
   deriving (Show, Eq)
 
 getBinLogMeta :: FieldType -> Get BinLogMeta
@@ -116,5 +117,6 @@ getBinLogMeta t
 
     | t == mySQLTypeBlob       = BINLOG_TYPE_BLOB <$> getWord8
     | t == mySQLTypeGeometry   = BINLOG_TYPE_GEOMETRY <$> getWord8
+    | t == mySQLTypeJSON       = BINLOG_TYPE_BLOB <$> getWord8
     | otherwise                = fail $ "Database.MySQL.BinLogProtocol.BinLogMeta:\
                                         \ impossible type in binlog: " ++ show t
