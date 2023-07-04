@@ -115,6 +115,7 @@ data MySQLValue
     | MySQLBytes         !ByteString
     | MySQLBit           !Word64
     | MySQLText          !Text
+    | MySQLJSON          !ByteString
     | MySQLNull
   deriving (Show, Eq, Generic)
 
@@ -141,6 +142,7 @@ putParamMySQLType (MySQLBytes        _)  = putFieldType mySQLTypeBlob     >> put
 putParamMySQLType (MySQLGeometry     _)  = putFieldType mySQLTypeGeometry >> putWord8 0x00
 putParamMySQLType (MySQLBit          _)  = putFieldType mySQLTypeBit      >> putWord8 0x00
 putParamMySQLType (MySQLText         _)  = putFieldType mySQLTypeString   >> putWord8 0x00
+putParamMySQLType (MySQLJSON         _)  = putFieldType mySQLTypeJSON     >> putWord8 0x00
 putParamMySQLType MySQLNull              = putFieldType mySQLTypeNull     >> putWord8 0x00
 
 --------------------------------------------------------------------------------
@@ -188,6 +190,7 @@ getTextField f
         || t == mySQLTypeString     = (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
+    | t == mySQLTypeJSON            = MySQLJSON <$> getLenEncBytes
 
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
@@ -247,6 +250,7 @@ putTextField (MySQLGeometry  bs) = putInQuotes $ putByteString . escapeBytes $ b
 putTextField (MySQLBytes     bs) = putInQuotes $ putByteString . escapeBytes $ bs
 putTextField (MySQLText       t) = putInQuotes $
                                       putByteString . T.encodeUtf8 . escapeText $ t
+putTextField (MySQLJSON       bs) = putInQuotes $ putByteString . escapeBytes $ bs
 putTextField (MySQLBit        b) = do putBuilder "b\'"
                                       putBuilder . execPut $ putTextBits b
                                       putCharUtf8 '\''
@@ -372,6 +376,7 @@ getBinaryField f
         || t == mySQLTypeString       = if isText then MySQLText . T.decodeUtf8 <$> getLenEncBytes
                                                   else MySQLBytes <$> getLenEncBytes
     | t == mySQLTypeBit               = MySQLBit <$> (getBits =<< getLenEncInt)
+    | t == mySQLTypeJSON              = MySQLJSON <$> getLenEncBytes
     | otherwise                       = fail $ "Database.MySQL.Protocol.MySQLValue:\
                                                \ missing binary decoder for " ++ show t
   where
@@ -445,6 +450,7 @@ putBinaryField (MySQLBytes  bs)    = putLenEncBytes bs
 putBinaryField (MySQLBit    word)  = do putWord8 8     -- always put full
                                         putWord64be word
 putBinaryField (MySQLText    t)    = putLenEncBytes (T.encodeUtf8 t)
+putBinaryField (MySQLJSON    bs)   = putLenEncBytes bs
 putBinaryField MySQLNull           = return ()
 
 putBinaryDay :: Day -> Put

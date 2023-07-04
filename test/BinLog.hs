@@ -33,11 +33,12 @@ tests c = do
     let timestamp = round $ utcTimeToPOSIXSeconds (localTimeToUTC z t)
 
     Just (RowUpdateEvent _ _ tme ue) <- Stream.read rowEventStream
-    assertEqual "decode update event cloumn" (updateColumnCnt ue) 30
+    assertEqual "decode update event cloumn" (updateColumnCnt ue) 31
     assertEqual "decode update event rows" (updateRowData ue)
         [
             (
                 [ BinLogLong 0
+                , BinLogNull
                 , BinLogNull
                 , BinLogNull
                 , BinLogNull
@@ -97,6 +98,7 @@ tests c = do
                 , BinLogBytes (encodeUtf8 "韩冬真赞")
                 , BinLogEnum 1
                 , BinLogSet 3
+                , BinLogNull
                 ]
             )
         ]
@@ -135,6 +137,7 @@ tests c = do
                 , BinLogBytes (encodeUtf8 "韩冬真赞")
                 , BinLogEnum 1
                 , BinLogSet 3
+                , BinLogNull
                 ],  [ BinLogLong 0
                 , BinLogBit 57514   -- 0b1110000010101010
                 , BinLogTiny (-1)
@@ -165,6 +168,7 @@ tests c = do
                 , BinLogBytes (encodeUtf8 "韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞韩冬真赞")
                 , BinLogEnum 1
                 , BinLogSet 3
+                , BinLogNull
                 ]
             )
         ]

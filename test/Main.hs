@@ -66,9 +66,11 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
                 \__blob         BLOB(1000000),\
                 \__text         TEXT(1000000),\
                 \__enum         ENUM('foo', 'bar', 'qux'),\
-                \__set          SET('foo', 'bar', 'qux')\
+                \__set          SET('foo', 'bar', 'qux'),\
+                \__value        JSON\
                 \) CHARACTER SET utf8"
 
+    step "finished create"
     resetTestTable c
 
     step "testing executeMany"
@@ -84,6 +86,7 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
     step "testing binary protocol"
     BinaryRow.tests c
 
+    step "finished all tests"
     resetTestTable c
 
 
@@ -142,6 +145,7 @@ main = defaultMain $ testCaseSteps "mysql-haskell test suit" $ \step -> do
             execute_ c  "DELETE FROM test WHERE __id=0"
             execute_ c  "INSERT INTO test VALUES(\
                     \0,\
+                    \NULL,\
                     \NULL,\
                     \NULL,\
                     \NULL,\
