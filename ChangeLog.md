@@ -1,5 +1,9 @@
 # Revision history for mysql-haskell
 
+## 0.8.4.3 -- 2024-04-02
+
+* fixed Double 1.36 to 1.35999 conversion 
+
 ## 0.8.4.2 -- 2019-01-22
 
 * Fix [stackage#4312](https://github.com/commercialhaskell/stackage/issues/4312): Relax `network` bounds.
