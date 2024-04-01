@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -funbox-strict-fields #-}
+{-# LANGUAGE BangPatterns #-}
 
 {-|
 Module      : Database.MySQL.Protocol.MySQLValue
@@ -34,17 +35,16 @@ module Database.MySQL.Protocol.MySQLValue
   ) where
 
 import qualified Blaze.Text                         as Textual
-import           Control.Applicative
 import           Control.Monad
 import           Data.Binary.Put
 import           Data.Binary.Parser
-import           Data.Binary.IEEE754
 import           Data.Bits
 import           Data.ByteString                    (ByteString)
 import qualified Data.ByteString                    as B
 import qualified Data.ByteString.Builder            as BB
 import           Data.ByteString.Builder.Scientific (FPFormat (..),
                                                      formatScientificBuilder)
+import qualified Data.ByteString                    as BS
 import qualified Data.ByteString.Char8              as BC
 import qualified Data.ByteString.Lazy               as L
 import qualified Data.ByteString.Lex.Fractional     as LexFrac
@@ -198,7 +198,7 @@ getTextField f
     isUnsigned = flagUnsigned (columnFlags f)
     isText = columnCharSet f /= 63
     intLexer bs = fst <$> LexInt.readSigned LexInt.readDecimal bs
-    fracLexer bs = fst <$> LexFrac.readSigned LexFrac.readDecimal bs
+    fracLexer bs = fst <$> LexFrac.readSigned readDecimalSafe bs
     dateParser bs = do
         (yyyy, rest) <- LexInt.readDecimal bs
         (mm, rest') <- LexInt.readDecimal (B.unsafeTail rest)
@@ -208,9 +208,33 @@ getTextField f
     timeParser bs = do
         (hh, rest) <- LexInt.readDecimal bs
         (mm, rest') <- LexInt.readDecimal (B.unsafeTail rest)
-        (ss, _) <- LexFrac.readDecimal (B.unsafeTail rest')
+        (ss, _) <- readDecimalSafe (B.unsafeTail rest')
         return (TimeOfDay hh mm ss)
 
+readDecimalSafe :: (Fractional a) => ByteString -> Maybe (a, ByteString)
+readDecimalSafe xs =
+    case LexInt.readDecimal xs of
+    Nothing          -> Nothing
+    Just (whole, ys) ->
+        case BS.uncons ys of
+        Nothing              -> justPair (fromInteger whole) BS.empty
+        Just (y0,ys0)
+            | isNotPeriod y0 -> justPair (fromInteger whole) ys
+            | otherwise      ->
+                case LexInt.readDecimal ys0 of
+                Nothing         -> justPair (fromInteger whole) ys
+                Just (part, zs) ->
+                    let base = 10 ^ (BS.length ys - 1 - BS.length zs)
+                        frac = (base * fromInteger whole + fromInteger part) / base -- saves us from 1 + 0.36 = 1.3599999999999999
+                    in justPair frac zs
+    where
+        {-# INLINE justPair #-}
+        justPair :: a -> b -> Maybe (a,b)
+        justPair !x !y = Just (x,y)
+
+        {-# INLINE isNotPeriod #-}
+        isNotPeriod :: Word8 -> Bool
+        isNotPeriod w = w /= 0x2E
 
 feedLenEncBytes :: FieldType -> (t -> b) -> (ByteString -> Maybe t) -> Get b
 feedLenEncBytes typ con parser = do
@@ -383,7 +407,7 @@ getBinaryField f
     t = columnType f
     isUnsigned = flagUnsigned (columnFlags f)
     isText = columnCharSet f /= 63
-    fracLexer bs = fst <$> LexFrac.readSigned LexFrac.readDecimal bs
+    fracLexer bs = fst <$> LexFrac.readSigned readDecimalSafe bs
     getYear :: Get Integer
     getYear = fromIntegral <$> getWord16le
     getInt8' :: Get Int
