@@ -56,7 +56,7 @@ common common-options
     -fenable-th-splice-warnings
     -fno-omit-yields
   build-depends:
-      base >=4.9.1.0 && <4.22.0
+      base >=4.9.1.0 && <4.22.0 || ^>=4.22.0
   default-language: GHC2021
 
 library
@@ -105,8 +105,8 @@ library
     pem >=0.2.4 && <0.3,
     scientific >=0.3 && <0.4,
     text >=1.1 && <2.1 || ^>=2.1,
-    time >=1.5.0 && <1.12 || ^>=1.12.2 || ^>=1.14,
-    tls >=1.7.0 && <1.8 || ^>=1.8.0 || ^>=1.9.0 || ^>=2.0.0 || ^>=2.1.0 || ^>=2.2.0 || ^>=2.3.0,
+    time >=1.5.0 && <1.12 || ^>=1.12.2 || ^>=1.14 || ^>=1.16.0,
+    tls >=1.7.0 && <1.8 || ^>=1.8.0 || ^>=1.9.0 || ^>=2.0.0 || ^>=2.1.0 || ^>=2.2.0 || ^>=2.3.0 || ^>=2.4.4,
     vector >=0.8 && <0.13 || ^>=0.13.0,
     word-compat >=0.0 && <0.1
 
@@ -116,7 +116,7 @@ library
       ram >=0.20 && <0.23
   else
     build-depends:
-      crypton >=0.31 && <0.40 || ^>=1.0.0,
+      crypton >=0.31 && <0.40 || ^>=1.0.0 || ^>=1.1.5,
       memory >=0.14.4 && <0.19
 
   default-extensions:
@@ -145,25 +145,25 @@ test-suite test
 
   hs-source-dirs:     test
   build-depends:
-    attoparsec < 1.0,
+    attoparsec <1.0,
     binary >=0.8,
     bytestring >=0.10,
     deepseq,
-    directory < 2.0,
-    filepath < 2.0,
+    directory <2.0,
+    filepath <2.0,
     io-streams,
     mysql-haskell,
     network,
     QuickCheck >=2.7 && <3.0,
-    quickcheck-instances < 1.0,
+    quickcheck-instances <1.0,
     scientific >=0.3.0,
     tasty >=0.11 && <2.0,
-    tasty-expected-failure < 1.0,
-    tasty-hunit < 1.0,
-    tasty-quickcheck >=0.8 && < 1.0,
+    tasty-expected-failure <1.0,
+    tasty-hunit <1.0,
+    tasty-quickcheck >=0.8 && <1.0,
     text,
     time,
-    unordered-containers < 1.0,
+    unordered-containers <1.0,
     vector
 
   default-extensions:
@@ -198,7 +198,7 @@ test-suite integration
     io-streams,
     mysql-haskell,
     tasty >=0.11 && <2.0,
-    tasty-hunit < 1.0,
+    tasty-hunit <1.0,
     text,
     time,
     vector
@@ -224,14 +224,14 @@ benchmark binary-parsers-bench
     attoparsec,
     binary,
     bytestring,
-    case-insensitive < 2,
+    case-insensitive <2,
     criterion >=1.1 && <1.2 || ^>=1.6.3,
     deepseq,
-    directory < 1.4,
-    filepath < 1.6,
-    http-types < 1.0,
+    directory <1.4,
+    filepath <1.6,
+    http-types <1.0,
     mysql-haskell,
-    scanner < 0.4,
+    scanner <0.4,
     scientific,
     text,
     unordered-containers,
